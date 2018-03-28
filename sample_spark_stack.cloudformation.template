@@ -1,0 +1,1269 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "vpce524b59e": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "10.0.0.0/16",
+                "InstanceTenancy": "default",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "sparknet"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "8416bd6e-76a9-43b2-9495-bed42117f193"
+                }
+            }
+        },
+        "subneta8b519a7": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": "10.0.1.0/24",
+                "AvailabilityZone": "us-east-1f",
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Private subnet"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "a7310e48-72ef-4d44-b205-f89e2473720e"
+                }
+            }
+        },
+        "subnet4eb51941": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": "10.0.0.0/24",
+                "AvailabilityZone": "us-east-1f",
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Public subnet"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "cf8278cb-a365-4baa-932f-4e8a038f6e3b"
+                }
+            }
+        },
+        "igwfba30b83": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "SparkStack"
+                    },
+                    {
+                        "Key": "TestKey",
+                        "Value": "test"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "71bf396d-1648-4f69-8c4b-9ef266a5041f"
+                }
+            }
+        },
+        "acl7b927c01": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "9468d636-3655-4f40-81a9-1f70dfbca2a6"
+                }
+            }
+        },
+        "rtb7208840e": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "f8c5f5ff-dfb0-4793-a63f-e9859a28b329"
+                }
+            }
+        },
+        "rtb2f018d53": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "359802f4-342f-44d0-a943-19ba4becaa4e"
+                }
+            }
+        },
+        "eip123456789": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "vpc"
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "c4bddf6c-2675-4c61-a952-a50597ffb4a0"
+                }
+            }
+        },
+        "eip123456789": {
+            "Type": "AWS::EC2::EIP",
+            "DependsOn": [
+                "gw1"
+            ],
+            "Properties": {
+                "Domain": "vpc"
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "9f665265-224e-46d9-87ca-a245b228729f"
+                }
+            }
+        },
+        "eni9a04c73f": {
+            "Type": "AWS::EC2::NetworkInterface",
+            "Properties": {
+                "Description": "spark_worker_if",
+                "SourceDestCheck": "true",
+                "SubnetId": {
+                    "Ref": "subneta8b519a7"
+                },
+                "PrivateIpAddresses": [
+                    {
+                        "PrivateIpAddress": "10.0.1.15",
+                        "Primary": "true"
+                    }
+                ],
+                "GroupSet": [
+                    "sg-172c0461",
+                    {
+                        "Ref": "sglaunchwizard2"
+                    },
+                    {
+                        "Ref": "sgsparkworkertraffic"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "spark_worker_if"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "7e7bd9cb-7329-4787-bfac-dca3fee021c3"
+                }
+            }
+        },
+        "enid90bc87c": {
+            "Type": "AWS::EC2::NetworkInterface",
+            "Properties": {
+                "Description": "spark_master_if",
+                "SourceDestCheck": "true",
+                "SubnetId": {
+                    "Ref": "subnet4eb51941"
+                },
+                "PrivateIpAddresses": [
+                    {
+                        "PrivateIpAddress": "10.0.0.33",
+                        "Primary": "true"
+                    }
+                ],
+                "GroupSet": [
+                    "sg-172c0461",
+                    {
+                        "Ref": "sgsparkmastertraffic"
+                    },
+                    {
+                        "Ref": "sgsparktraffic"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "spark_master_if"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "88f2ab95-1837-41d6-8f90-39076705dba7"
+                }
+            }
+        },
+        "asgsparkworkermicrogroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "AvailabilityZones": [
+                    "us-east-1f"
+                ],
+                "Cooldown": "300",
+                "DesiredCapacity": "2",
+                "HealthCheckGracePeriod": "300",
+                "HealthCheckType": "EC2",
+                "MaxSize": "4",
+                "MinSize": "2",
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "subneta8b519a7"
+                    }
+                ],
+                "LaunchConfigurationName": {
+                    "Ref": "lcautoscalesparkworkermicro"
+                },
+                "TerminationPolicies": [
+                    "Default"
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "20f15202-d128-48a8-bc04-cd10be7c8265"
+                }
+            }
+        },
+        "lcautoscalesparkworkermicro": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "ImageId": "ami-43a15f3e",
+                "InstanceType": "t2.micro",
+                "KeyName": "spark-test",
+                "SpotPrice": "0.0036",
+                "SecurityGroups": [
+                    "sg-172c0461",
+                    {
+                        "Ref": "sgsparkworkertraffic"
+                    }
+                ],
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "SnapshotId": "snap-0a83a22928e9afbe9",
+                            "VolumeSize": 8
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "ded3d756-f431-4ea6-9b89-214c596e3a91"
+                }
+            }
+        },
+        "instancei037d8e822c071512e": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "DisableApiTermination": "false",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "ImageId": "ami-66506c1c",
+                "InstanceType": "t2.micro",
+                "KeyName": "spark-test",
+                "Monitoring": "false",
+                "NetworkInterfaces": [
+                    {
+                        "DeleteOnTermination": "true",
+                        "DeviceIndex": 0,
+                        "SubnetId": {
+                            "Ref": "subneta8b519a7"
+                        },
+                        "PrivateIpAddresses": [
+                            {
+                                "PrivateIpAddress": "10.0.1.76",
+                                "Primary": "true"
+                            }
+                        ],
+                        "GroupSet": [
+                            "sg-172c0461",
+                            {
+                                "Ref": "sgsparkworkertraffic"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "65454cd3-b8cb-4eca-be36-39f1e919f67c"
+                }
+            }
+        },
+        "instancei017be1f6744bad7d8": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "DisableApiTermination": "false",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "ImageId": "ami-66506c1c",
+                "InstanceType": "t2.micro",
+                "KeyName": "spark-test",
+                "Monitoring": "false",
+                "NetworkInterfaces": [
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "spark_master_if",
+                        "DeviceIndex": 0,
+                        "SubnetId": {
+                            "Ref": "subnet4eb51941"
+                        },
+                        "PrivateIpAddresses": [
+                            {
+                                "PrivateIpAddress": "10.0.0.33",
+                                "Primary": "true"
+                            }
+                        ],
+                        "GroupSet": [
+                            "sg-172c0461",
+                            {
+                                "Ref": "sglaunchwizard2"
+                            },
+                            {
+                                "Ref": "sgsparkmastertraffic"
+                            },
+                            {
+                                "Ref": "sgsparktraffic"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "6d001c75-84a4-4a4d-8413-154d4e78057c"
+                }
+            }
+        },
+        "s3publicea540be9c0": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "VersioningConfiguration": {
+                    "Status": "Suspended"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "5d0ceed7-5c8a-45ae-abfc-a9dd877d2c85"
+                }
+            }
+        },
+        "sgsparktraffic": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "spark traffic",
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "spark_monitor"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "2cca735e-1c94-4d5c-8b30-49b4d0ee12fe"
+                }
+            }
+        },
+        "sgsparkworkertraffic": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "spark worker traffic",
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "spark_worker"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "dcf5e5d8-b2ab-4270-8952-adc265776e46"
+                }
+            }
+        },
+        "sgsparkmastertraffic": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "spark master traffic",
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "spark_master"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "4416f42b-c906-444e-8d3c-414981699500"
+                }
+            }
+        },
+        "sglaunchwizard2": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "launch-wizard-2 created 2018-03-26T20:48:20.518-04:00",
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "sparknet ssh"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "4dcfc29b-6c0a-40bf-9f38-300923b7dc36"
+                }
+            }
+        },
+        "scalingScaleGroupSize": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "PolicyType": "TargetTrackingScaling",
+                "StepAdjustments": [],
+                "AutoScalingGroupName": {
+                    "Ref": "asgsparkworkermicrogroup"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "88cefeef-7d8e-45c4-ad38-1bbbd243d51f"
+                }
+            }
+        },
+        "alarmTargetTrackingsparkworkermicrogroupAlarmHigh0ed239fed13242d8bac4003cec775b8c": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "ActionsEnabled": "true",
+                "AlarmDescription": "DO NOT EDIT OR DELETE. For TargetTrackingScaling policy arn:aws:autoscaling:us-east-1:350586422871:scalingPolicy:f5c1aeff-f1c2-4856-a92c-b1206bb5cdd5:autoScalingGroupName/spark worker micro group:policyName/Scale Group Size.",
+                "ComparisonOperator": "GreaterThanThreshold",
+                "EvaluationPeriods": "3",
+                "MetricName": "NetworkIn",
+                "Namespace": "AWS/EC2",
+                "Period": "60",
+                "Statistic": "Average",
+                "Threshold": "500000000.0",
+                "Unit": "Bytes",
+                "AlarmActions": [
+                    {
+                        "Ref": "scalingScaleGroupSize"
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": "spark worker micro group"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "e9aba8e9-733a-4ea2-a4c3-b9059418223e"
+                }
+            }
+        },
+        "alarmTargetTrackingsparkworkermicrogroupAlarmLow11989660e20a4388b425ea7fdac0e789": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "ActionsEnabled": "true",
+                "AlarmDescription": "DO NOT EDIT OR DELETE. For TargetTrackingScaling policy arn:aws:autoscaling:us-east-1:350586422871:scalingPolicy:f5c1aeff-f1c2-4856-a92c-b1206bb5cdd5:autoScalingGroupName/spark worker micro group:policyName/Scale Group Size.",
+                "ComparisonOperator": "LessThanThreshold",
+                "EvaluationPeriods": "15",
+                "MetricName": "NetworkIn",
+                "Namespace": "AWS/EC2",
+                "Period": "60",
+                "Statistic": "Average",
+                "Threshold": "350000000.0",
+                "Unit": "Bytes",
+                "AlarmActions": [
+                    {
+                        "Ref": "scalingScaleGroupSize"
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": "spark worker micro group"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "b8471f3e-10b5-47f3-8ae9-8f1b25a6b591"
+                }
+            }
+        },
+        "acl1": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Egress": "true",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "acl7b927c01"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "670cc48c-54d5-4ba0-868f-ddb300c42f12"
+                }
+            }
+        },
+        "acl2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "RuleNumber": "100",
+                "NetworkAclId": {
+                    "Ref": "acl7b927c01"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "735e8cde-9b4b-43e6-a180-319d6216e5b3"
+                }
+            }
+        },
+        "subnetacl1": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "acl7b927c01"
+                },
+                "SubnetId": {
+                    "Ref": "subneta8b519a7"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "888eeb36-9bd7-4496-b087-6f6e49983139"
+                }
+            }
+        },
+        "subnetacl2": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "NetworkAclId": {
+                    "Ref": "acl7b927c01"
+                },
+                "SubnetId": {
+                    "Ref": "subnet4eb51941"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "6a0d6705-e5a1-4f60-a8dc-e5768bb4b55b"
+                }
+            }
+        },
+        "gw1": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": "vpc-518b1a2a",
+                "InternetGatewayId": {
+                    "Ref": "igwfba30b83"
+                }
+            }
+        },
+        "subnetroute2": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "rtb2f018d53"
+                },
+                "SubnetId": {
+                    "Ref": "subnet4eb51941"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "79ea4913-05e8-4b36-8ae2-888f81c35a87"
+                }
+            }
+        },
+        "route1": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "rtb7208840e"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "9f4f4dd3-dcd1-4182-950c-8dcaea50a197"
+                }
+            }
+        },
+        "route2": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "rtb2f018d53"
+                },
+                "GatewayId": "igw-ea2f8792"
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "d9a43107-d2a3-4632-a390-a888efe641f9"
+                }
+            }
+        },
+        "dchpassoc1": {
+            "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "vpce524b59e"
+                },
+                "DhcpOptionsId": "dopt-2ad9714e"
+            }
+        },
+        "assoc1": {
+            "Type": "AWS::EC2::EIPAssociation",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "eip123456789",
+                        "AllocationId"
+                    ]
+                },
+                "InstanceId": {
+                    "Ref": "instancei017be1f6744bad7d8"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "8baaf05a-378f-45de-8b00-b798879f2c11"
+                }
+            }
+        },
+        "ingress1": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparktraffic"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "80",
+                "ToPort": "80",
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "ingress2": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparktraffic"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "4040",
+                "ToPort": "4040",
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "ingress3": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparktraffic"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "8080",
+                "ToPort": "8080",
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "ingress4": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparkworkertraffic"
+                },
+                "IpProtocol": "-1",
+                "CidrIp": "10.0.0.0/24"
+            }
+        },
+        "ingress5": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparkmastertraffic"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "7077",
+                "ToPort": "7077",
+                "CidrIp": "10.0.1.0/24"
+            }
+        },
+        "ingress6": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sglaunchwizard2"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "22",
+                "ToPort": "22",
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "egress1": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparktraffic"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "8080",
+                "ToPort": "8080",
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "egress2": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparkworkertraffic"
+                },
+                "IpProtocol": "-1",
+                "CidrIp": "10.0.0.0/24"
+            }
+        },
+        "egress3": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sgsparkmastertraffic"
+                },
+                "IpProtocol": "-1",
+                "CidrIp": "10.0.1.0/24"
+            }
+        },
+        "egress4": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "sglaunchwizard2"
+                },
+                "IpProtocol": "-1",
+                "CidrIp": "0.0.0.0/0"
+            }
+        }
+    },
+    "Description": "Sample Spark Stack",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "5d0ceed7-5c8a-45ae-abfc-a9dd877d2c85": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 60,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "c4bddf6c-2675-4c61-a952-a50597ffb4a0": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 180,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "71bf396d-1648-4f69-8c4b-9ef266a5041f": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 300,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "9f665265-224e-46d9-87ca-a245b228729f": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 420,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "8416bd6e-76a9-43b2-9495-bed42117f193": {
+                "size": {
+                    "width": 1050,
+                    "height": 960
+                },
+                "position": {
+                    "x": 60,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": [
+                    "4dcfc29b-6c0a-40bf-9f38-300923b7dc36",
+                    "4416f42b-c906-444e-8d3c-414981699500",
+                    "dcf5e5d8-b2ab-4270-8952-adc265776e46",
+                    "2cca735e-1c94-4d5c-8b30-49b4d0ee12fe",
+                    "359802f4-342f-44d0-a943-19ba4becaa4e",
+                    "f8c5f5ff-dfb0-4793-a63f-e9859a28b329",
+                    "9468d636-3655-4f40-81a9-1f70dfbca2a6",
+                    "cf8278cb-a365-4baa-932f-4e8a038f6e3b",
+                    "a7310e48-72ef-4d44-b205-f89e2473720e"
+                ]
+            },
+            "4dcfc29b-6c0a-40bf-9f38-300923b7dc36": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 870,
+                    "y": 150
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "4416f42b-c906-444e-8d3c-414981699500": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 870,
+                    "y": 270
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "dcf5e5d8-b2ab-4270-8952-adc265776e46": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 480,
+                    "y": 750
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "ded3d756-f431-4ea6-9b89-214c596e3a91": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 540,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "dcf5e5d8-b2ab-4270-8952-adc265776e46"
+                ]
+            },
+            "2cca735e-1c94-4d5c-8b30-49b4d0ee12fe": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 600,
+                    "y": 750
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "359802f4-342f-44d0-a943-19ba4becaa4e": {
+                "size": {
+                    "width": 240,
+                    "height": 240
+                },
+                "position": {
+                    "x": 780,
+                    "y": 450
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [
+                    "d9a43107-d2a3-4632-a390-a888efe641f9"
+                ],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "d9a43107-d2a3-4632-a390-a888efe641f9": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 810,
+                    "y": 510
+                },
+                "z": 3,
+                "parent": "359802f4-342f-44d0-a943-19ba4becaa4e",
+                "embeds": [],
+                "iscontainedinside": [
+                    "359802f4-342f-44d0-a943-19ba4becaa4e"
+                ]
+            },
+            "f8c5f5ff-dfb0-4793-a63f-e9859a28b329": {
+                "size": {
+                    "width": 240,
+                    "height": 240
+                },
+                "position": {
+                    "x": 480,
+                    "y": 450
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [
+                    "9f4f4dd3-dcd1-4182-950c-8dcaea50a197"
+                ],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "9f4f4dd3-dcd1-4182-950c-8dcaea50a197": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 510,
+                    "y": 510
+                },
+                "z": 3,
+                "parent": "f8c5f5ff-dfb0-4793-a63f-e9859a28b329",
+                "embeds": [],
+                "iscontainedinside": [
+                    "f8c5f5ff-dfb0-4793-a63f-e9859a28b329"
+                ]
+            },
+            "9468d636-3655-4f40-81a9-1f70dfbca2a6": {
+                "size": {
+                    "width": 330,
+                    "height": 240
+                },
+                "position": {
+                    "x": 480,
+                    "y": 150
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [
+                    "735e8cde-9b4b-43e6-a180-319d6216e5b3",
+                    "670cc48c-54d5-4ba0-868f-ddb300c42f12"
+                ],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "735e8cde-9b4b-43e6-a180-319d6216e5b3": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 510,
+                    "y": 210
+                },
+                "z": 3,
+                "parent": "9468d636-3655-4f40-81a9-1f70dfbca2a6",
+                "embeds": [],
+                "iscontainedinside": [
+                    "9468d636-3655-4f40-81a9-1f70dfbca2a6"
+                ]
+            },
+            "670cc48c-54d5-4ba0-868f-ddb300c42f12": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 630,
+                    "y": 210
+                },
+                "z": 3,
+                "parent": "9468d636-3655-4f40-81a9-1f70dfbca2a6",
+                "embeds": [],
+                "iscontainedinside": [
+                    "9468d636-3655-4f40-81a9-1f70dfbca2a6"
+                ]
+            },
+            "cf8278cb-a365-4baa-932f-4e8a038f6e3b": {
+                "size": {
+                    "width": 330,
+                    "height": 240
+                },
+                "position": {
+                    "x": 90,
+                    "y": 540
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [
+                    "6d001c75-84a4-4a4d-8413-154d4e78057c",
+                    "88f2ab95-1837-41d6-8f90-39076705dba7"
+                ],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "79ea4913-05e8-4b36-8ae2-888f81c35a87": {
+                "source": {
+                    "id": "359802f4-342f-44d0-a943-19ba4becaa4e"
+                },
+                "target": {
+                    "id": "cf8278cb-a365-4baa-932f-4e8a038f6e3b"
+                }
+            },
+            "6a0d6705-e5a1-4f60-a8dc-e5768bb4b55b": {
+                "source": {
+                    "id": "9468d636-3655-4f40-81a9-1f70dfbca2a6"
+                },
+                "target": {
+                    "id": "cf8278cb-a365-4baa-932f-4e8a038f6e3b"
+                }
+            },
+            "6d001c75-84a4-4a4d-8413-154d4e78057c": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 120,
+                    "y": 600
+                },
+                "z": 3,
+                "parent": "cf8278cb-a365-4baa-932f-4e8a038f6e3b",
+                "embeds": [],
+                "iscontainedinside": [
+                    "cf8278cb-a365-4baa-932f-4e8a038f6e3b"
+                ]
+            },
+            "8baaf05a-378f-45de-8b00-b798879f2c11": {
+                "source": {
+                    "id": "9f665265-224e-46d9-87ca-a245b228729f"
+                },
+                "target": {
+                    "id": "6d001c75-84a4-4a4d-8413-154d4e78057c"
+                }
+            },
+            "88f2ab95-1837-41d6-8f90-39076705dba7": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 240,
+                    "y": 600
+                },
+                "z": 3,
+                "parent": "cf8278cb-a365-4baa-932f-4e8a038f6e3b",
+                "embeds": [],
+                "isassociatedwith": [
+                    "4416f42b-c906-444e-8d3c-414981699500",
+                    "2cca735e-1c94-4d5c-8b30-49b4d0ee12fe"
+                ],
+                "iscontainedinside": [
+                    "cf8278cb-a365-4baa-932f-4e8a038f6e3b"
+                ]
+            },
+            "a7310e48-72ef-4d44-b205-f89e2473720e": {
+                "size": {
+                    "width": 330,
+                    "height": 330
+                },
+                "position": {
+                    "x": 90,
+                    "y": 150
+                },
+                "z": 2,
+                "parent": "8416bd6e-76a9-43b2-9495-bed42117f193",
+                "embeds": [
+                    "65454cd3-b8cb-4eca-be36-39f1e919f67c",
+                    "20f15202-d128-48a8-bc04-cd10be7c8265",
+                    "7e7bd9cb-7329-4787-bfac-dca3fee021c3"
+                ],
+                "iscontainedinside": [
+                    "8416bd6e-76a9-43b2-9495-bed42117f193"
+                ]
+            },
+            "888eeb36-9bd7-4496-b087-6f6e49983139": {
+                "source": {
+                    "id": "9468d636-3655-4f40-81a9-1f70dfbca2a6"
+                },
+                "target": {
+                    "id": "a7310e48-72ef-4d44-b205-f89e2473720e"
+                }
+            },
+            "65454cd3-b8cb-4eca-be36-39f1e919f67c": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 120,
+                    "y": 210
+                },
+                "z": 3,
+                "parent": "a7310e48-72ef-4d44-b205-f89e2473720e",
+                "embeds": [],
+                "iscontainedinside": [
+                    "a7310e48-72ef-4d44-b205-f89e2473720e"
+                ]
+            },
+            "20f15202-d128-48a8-bc04-cd10be7c8265": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 240,
+                    "y": 210
+                },
+                "z": 3,
+                "parent": "a7310e48-72ef-4d44-b205-f89e2473720e",
+                "embeds": [],
+                "isassociatedwith": [
+                    "ded3d756-f431-4ea6-9b89-214c596e3a91"
+                ],
+                "iscontainedinside": [
+                    "a7310e48-72ef-4d44-b205-f89e2473720e"
+                ]
+            },
+            "88cefeef-7d8e-45c4-ad38-1bbbd243d51f": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 660,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "20f15202-d128-48a8-bc04-cd10be7c8265"
+                ]
+            },
+            "b8471f3e-10b5-47f3-8ae9-8f1b25a6b591": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 780,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "e9aba8e9-733a-4ea2-a4c3-b9059418223e": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 900,
+                    "y": 1110
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "7e7bd9cb-7329-4787-bfac-dca3fee021c3": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 120,
+                    "y": 330
+                },
+                "z": 3,
+                "parent": "a7310e48-72ef-4d44-b205-f89e2473720e",
+                "embeds": [],
+                "isassociatedwith": [
+                    "4dcfc29b-6c0a-40bf-9f38-300923b7dc36",
+                    "dcf5e5d8-b2ab-4270-8952-adc265776e46"
+                ],
+                "iscontainedinside": [
+                    "a7310e48-72ef-4d44-b205-f89e2473720e"
+                ]
+            }
+        }
+    }
+}
